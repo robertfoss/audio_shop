@@ -1,7 +1,7 @@
 # Audio Shop
 Your frinedly neighbourhood script for mangling images using audio editing tools
 
-### Usage
+## Usage
     $ ./mangle.sh in.jpg out.png [effect [effect]]
     
     List of effects:
@@ -18,17 +18,18 @@ Your frinedly neighbourhood script for mangling images using audio editing tools
     
     A full list of effects can be found here: http://sox.sourceforge.net/sox.html#EFFECTS
 
-### Effect bass
+## Effects
+### Bass
 ![Alt text](/../media/eiffel_tower_bass.jpg?raw=true "eiffel_tower bass")
 
-### Effect echo
+### Echo
 ![Alt text](/../media/eiffel_tower_echo.jpg?raw=true "eiffel_tower echo")
 
-### Effect overdrive
+### Overdrive
 ![Alt text](/../media/eiffel_tower_overdrive.jpg?raw=true "eiffel_tower overdrive")
 
-### Effect phaser
+### Phaser
 ![Alt text](/../media/eiffel_tower_phaser.jpg?raw=true "eiffel_tower phaser")
 
-### Effect sinc
+### Sinc
 ![Alt text](/../media/eiffel_tower_sinc.jpg?raw=true "eiffel_tower sinc")
