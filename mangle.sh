@@ -65,7 +65,7 @@ helpNeeded $@
 args $@
 
 INFO=$(identify $1 || { echo >&2 "$1 is not a valid image"; exit 1; })
-RES=$(echo $INFO | cut -f3 -d' ' || { echo >&2 "$1 is dos not have a resolution?"; exit 1; })
+RES=$(echo $INFO | cut -f3 -d' ' || { echo >&2 "$1 does not have a resolution?"; exit 1; })
 cmd ffmpeg -y -i $1 -pix_fmt $YUV_FMT /tmp/tmp.yuv
 cp /tmp/tmp.yuv /tmp/tmp_audio_in.$S_TYPE
 cmd sox --bits $BITS -c1 -r44100 --encoding unsigned-integer -t $S_TYPE /tmp/tmp_audio_in.$S_TYPE  \
