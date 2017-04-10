@@ -18,6 +18,7 @@ function printHelp()
     echo "norm 90"
     echo "echo 0.8 0.88 60 0.4"
     echo "hilbert -n 5001"
+    echo "loudness 6"
     echo ""
     echo "A full list of effects can be found here: http://sox.sourceforge.net/sox.html#EFFECTS"
 
