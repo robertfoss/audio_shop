@@ -1,7 +1,7 @@
 # Audio Shop
 Your frinedly neighbourhood script for mangling images using audio editing tools.
 
-If you'd like to read more about how this acutally works, have a look [here](http://memcpy.io/audio-editing-images.html)
+If you'd like to read more about how this acutally works, have a look [here](http://memcpy.io/audio-editing-images.html).
 
 ## Usage
     $ ./mangle.sh in.jpg out.png [effect [effect]]
@@ -17,6 +17,8 @@ If you'd like to read more about how this acutally works, have a look [here](htt
     overdrive 17
     norm 90
     echo 0.8 0.88 60 0.4
+    hilbert -n 5001
+    loudness 6
     
     A full list of effects can be found here: http://sox.sourceforge.net/sox.html#EFFECTS
     
