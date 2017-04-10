@@ -1,8 +1,22 @@
 # Audio Shop
 Your frinedly neighbourhood script for mangling images using audio editing tools
 
-### Input
-![Alt text](/../media/eiffel_tower.jpg?raw=true "eiffel_tower")
+### Usage
+    $ ./mangle.sh in.jpg out.png [effect [effect]]
+    
+    List of effects:
+    vol 10
+    bass 5
+    sinc 20-4k
+    riaa
+    pitch 2
+    phaser 0.8 0.74 3 0.7 0.5
+    phaser 0.8 0.74 3 0.4 0.5
+    overdrive 17
+    norm 90
+    echo 0.8 0.88 60 0.4
+    
+    A full list of effects can be found here: http://sox.sourceforge.net/sox.html#EFFECTS
 
 ### Effect bass
 ![Alt text](/../media/eiffel_tower_bass.jpg?raw=true "eiffel_tower bass")
