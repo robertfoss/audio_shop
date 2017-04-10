@@ -4,7 +4,7 @@ function printHelp()
 {
     echo "This script requires ImageMagick, Sox and ffmpeg to be installed"
     echo ""
-    echo "$ mangle.sh in.jpg out.png [effect [effect]]"
+    echo "$ ./mangle.sh in.jpg out.png [effect [effect]]"
     echo ""
     echo "List of effects:"
     echo "vol 10"
