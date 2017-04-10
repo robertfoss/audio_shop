@@ -18,10 +18,10 @@ Your frinedly neighbourhood script for mangling images using audio editing tools
     
     A full list of effects can be found here: http://sox.sourceforge.net/sox.html#EFFECTS
     
-## Requirements
-    ffmpeg
-    imagemagick
-    sox
+## Dependencies
+ * ffmpeg
+ * imagemagick
+ * sox
 
 ## Effects
 ### Bass
