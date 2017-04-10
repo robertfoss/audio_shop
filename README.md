@@ -1,5 +1,7 @@
 # Audio Shop
-Your frinedly neighbourhood script for mangling images using audio editing tools
+Your frinedly neighbourhood script for mangling images using audio editing tools.
+
+If you'd like to read more about how this acutally works, have a look [here](http://memcpy.io/audio-editing-images.html)
 
 ## Usage
     $ ./mangle.sh in.jpg out.png [effect [effect]]
