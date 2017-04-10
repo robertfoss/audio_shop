@@ -17,6 +17,11 @@ Your frinedly neighbourhood script for mangling images using audio editing tools
     echo 0.8 0.88 60 0.4
     
     A full list of effects can be found here: http://sox.sourceforge.net/sox.html#EFFECTS
+    
+## Requirements
+    ffmpeg
+    imagemagick
+    sox
 
 ## Effects
 ### Bass
