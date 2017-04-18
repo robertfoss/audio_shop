@@ -2,9 +2,8 @@
 
 function cleanup()
 {
-    rm -rf --preserve-root ${TMP_DIR}
-    echo "$1"
-    exit $1
+    rm -rf --preserve-root "${TMP_DIR}"
+    exit "$1"
 }
 
 function printDependencies()
@@ -58,20 +57,20 @@ function printHelp()
 
 function helpNeeded()
 {
-    if [ -z ${1+x} ]; then
+    if [[ -z ${1+x} ]]; then
         echo -e "Input file not provided!\n"
         printHelp
-    elif [ ! -f "$1" ]; then
+    elif [[ ! -f $1 ]]; then
         echo -e "Input file '$1' not found!\n"
         printHelp
     fi
 
-    if [ -z ${2+x} ]; then
+    if [[ -z ${2+x} ]]; then
          echo -e "Output file not provided!\n"
         printHelp
     fi
 
-    if [ -z ${3+x} ]; then
+    if [[ -z ${3+x} ]]; then
          echo -e "No effect specified\n"
         printHelp
     fi
@@ -90,7 +89,7 @@ function parseArgs()
     case $i in
         --res=*)
             export RES=${i#*=}
-            RES_COLON=$(echo $RES | tr x :)
+            RES_COLON=$(echo "$RES" | tr x :)
             FFMPEG_IN_OPTS="$FFMPEG_IN_OPTS -vf scale=$RES_COLON"
         ;;
         --bits=*)
@@ -131,10 +130,10 @@ function parseArgs()
 
 function cmd()
 {
-    OUTPUT=$(eval $@ 2>&1)
-    if [ $? -ne 0 ]; then
+    OUTPUT=$(eval "$@" 2>&1)
+    if (( $? )); then
         echo -e "\n----- ERROR -----"
-        echo -e "\n\$ $@\n\n"
+        echo -e "\n\$ ${*}\n\n"
         echo -e "$OUTPUT"
         echo -e "\n----- ERROR -----"
         cleanup 1
@@ -144,10 +143,10 @@ function cmd()
 
 function cmdSilent()
 {
-    OUTPUT=$(eval $@ 2>&1)
-    if [ $? -ne 0 ]; then
+    OUTPUT=$(eval "$@" 2>&1)
+    if (( $? )); then
         echo -e "\n----- ERROR -----"
-        echo -e "\n\$ $@\n\n"
+        echo -e "\n\$ ${*}\n\n"
         echo -e "$OUTPUT"
         echo -e "\n----- ERROR -----"
         cleanup 1
@@ -156,13 +155,15 @@ function cmdSilent()
 
 function getResolution()
 {
-    eval $(cmd "ffprobe -v error -of flat=s=_ -select_streams v:0 -show_entries stream=height,width \"$1\"")
-    RES=${streams_stream_0_width}${2}${streams_stream_0_height}
-    echo $RES
+
+    eval "$(cmd ffprobe -v error -of flat=s=_ -select_streams v:0 -show_entries stream=height,width "$1")"
+    RES="${streams_stream_0_width}${2}${streams_stream_0_height}"
+    echo "$RES"
 }
 
 function getFrames()
 {
+
     FRAMES=$(cmd "ffprobe -v error -select_streams v:0 -show_entries stream=nb_frames -of default=noprint_wrappers=1:nokey=1 \"$1\"")
     REGEXP_INTEGER='^[0-9]+$'
     if ! [[ $FRAMES =~ $REGEXP_INTEGER ]] ; then
@@ -184,7 +185,7 @@ function checkDependencies()
     for CMD in "$@"
     do
         if ! type "$CMD" > /dev/null; then
-            printDependencies $CMD
+            printDependencies "$CMD"
         fi
     done
 }
@@ -201,9 +202,9 @@ echo "TMP_DIR:         $TMP_DIR"
 echo "RES:             $RES"
 echo "VIDEO:           $VIDEO"
 echo "AUDIO:           $AUDIO"
-echo "FFMPEG_IN_OPTS:  $(eval echo $FFMPEG_IN_OPTS)"
-echo "FFMPEG_OUT_OPTS: $(eval echo $FFMPEG_OUT_OPTS)"
-echo "SOX_OPTS:        $(eval echo $SOX_OPTS)"
+echo "FFMPEG_IN_OPTS:  $(eval echo "$FFMPEG_IN_OPTS")"
+echo "FFMPEG_OUT_OPTS: $(eval echo "$FFMPEG_OUT_OPTS")"
+echo "SOX_OPTS:        $(eval echo "$SOX_OPTS")"
 
 echo "Extracting raw image data.."
 cmdSilent "ffmpeg -y -i \"$1\" -pix_fmt $YUV_FMT $FFMPEG_IN_OPTS  $TMP_DIR/tmp.yuv"
@@ -212,15 +213,15 @@ cmdSilent "ffmpeg -y -i \"$1\" -pix_fmt $YUV_FMT $FFMPEG_IN_OPTS  $TMP_DIR/tmp.y
 [[ $AUDIO = *[!\ ]* ]] && cmdSilent "ffmpeg -y -i \"$1\" -q:a 0 -map a $TMP_DIR/audio_in.mp3"
 
 echo "Processing as sound.."
-mv $TMP_DIR/tmp.yuv $TMP_DIR/tmp_audio_in.$S_TYPE
-cmdSilent sox --bits $BITS -c1 -r44100 --encoding unsigned-integer -t $S_TYPE $TMP_DIR/tmp_audio_in.$S_TYPE  \
-              --bits $BITS -c1 -r44100 --encoding unsigned-integer -t $S_TYPE $TMP_DIR/tmp_audio_out.$S_TYPE \
-              $SOX_OPTS
+mv "$TMP_DIR"/tmp.yuv "$TMP_DIR"/tmp_audio_in."$S_TYPE"
+cmdSilent sox --bits "$BITS" -c1 -r44100 --encoding unsigned-integer -t "$S_TYPE" "$TMP_DIR"/tmp_audio_in."$S_TYPE"  \
+              --bits "$BITS" -c1 -r44100 --encoding unsigned-integer -t "$S_TYPE" "$TMP_DIR"/tmp_audio_out."$S_TYPE" \
+              "$SOX_OPTS"
 
 [[ $AUDIO = *[!\ ]* ]] && echo "Processing audio track as sound.."
-[[ $AUDIO = *[!\ ]* ]] && cmdSilent sox $TMP_DIR/audio_in.mp3  \
-                                        $TMP_DIR/audio_out.mp3 \
-                                        $SOX_OPTS
+[[ $AUDIO = *[!\ ]* ]] && cmdSilent sox "$TMP_DIR"/audio_in.mp3  \
+                                        "$TMP_DIR"/audio_out.mp3 \
+                                        "$SOX_OPTS"
 
 echo "Recreating image data from audio.."
 cmdSilent ffmpeg -y \
