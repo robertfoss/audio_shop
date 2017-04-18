@@ -42,7 +42,6 @@ If you'd like to read more about how this actually works, have a look [here](htt
     
 ## Dependencies
  * ffmpeg
- * imagemagick
  * sox
 
 ## Effects
