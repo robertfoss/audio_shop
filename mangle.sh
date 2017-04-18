@@ -58,20 +58,20 @@ function printHelp()
 function helpNeeded()
 {
     if [ -z ${1+x} ]; then
-        echo "Input file not provided!"
+        echo -e "Input file not provided!\n"
         printHelp
     elif [ ! -f $1 ]; then
-        echo "Input file '$1' not found!"
+        echo -e "Input file '$1' not found!\n"
         printHelp
     fi
 
     if [ -z ${2+x} ]; then
-         echo "Output file not provided!"
+         echo -e "Output file not provided!\n"
         printHelp
     fi
 
     if [ -z ${3+x} ]; then
-         echo "No effect specified"
+         echo -e "No effect specified\n"
         printHelp
     fi
 }
@@ -189,14 +189,17 @@ function checkDependencies()
 }
 
 checkDependencies ffprobe ffmpeg sox tr
+parseArgs $@
 
 TMP_DIR=$(mktemp -d "/tmp/audio_shop-XXXXX")
-RES=$(getResolution $1 "x")
-parseArgs $@
-VIDEO=$(getFrames $1)
-AUDIO=$(getAudio $1)
+RES=${RES:-"$(getResolution $1 x)"}
+VIDEO=${VIDEO:-"$(getFrames $1)"}
+AUDIO=${AUDIO:-"$(getAudio $1)"}
 
 echo "TMP_DIR:         $TMP_DIR"
+echo "RES:             $RES"
+echo "VIDEO:           $VIDEO"
+echo "AUDIO:           $AUDIO"
 echo "FFMPEG_IN_OPTS:  $(eval echo $FFMPEG_IN_OPTS)"
 echo "FFMPEG_OUT_OPTS: $(eval echo $FFMPEG_OUT_OPTS)"
 echo "SOX_OPTS:        $(eval echo $SOX_OPTS)"
