@@ -1,17 +1,27 @@
 #!/usr/bin/env bash
 
+function cleanup()
+{
+    rm -rf --preserve-root ${TMP_DIR}
+    exit $1
+}
+
 function printDependencies()
 {
     echo "Error: \"$1\" could not be found, but is required"
     echo ""
     echo "This script requires ffmpeg and Sox to be installed"
 
-    exit 1
+    cleanup 1
 }
 
 function printHelp()
 {
     echo "$ ./mangle.sh in.jpg out.png [effect [effect]]"
+    echo ""
+    echo "This script lets you interpret image or video data as sound,"
+    echo "and apply audio effects to it before converting it back to"
+    echo "image representation"
     echo ""
     echo "Options:"
     echo "--bits=X          -- Set audio sample size in bits, 8/16/24"
@@ -20,22 +30,23 @@ function printHelp()
     echo "--res=WxH         -- Set output resolution, 1920x1080"
     echo ""
     echo "Effects:"
-    echo "vol 10"
     echo "bass 5"
-    echo "sinc 20-4k"
-    echo "riaa"
-    echo "pitch 2"
-    echo "phaser 0.8 0.74 3 0.7 0.5"
-    echo "phaser 0.8 0.74 3 0.4 0.5"
-    echo "overdrive 17"
-    echo "norm 90"
     echo "echo 0.8 0.88 60 0.4"
+    echo "flanger 0 2 0 71 0.5 25 lin"
     echo "hilbert -n 5001"
     echo "loudness 6"
+    echo "norm 90"
+    echo "overdrive 17"
+    echo "phaser 0.8 0.74 3 0.7 0.5"
+    echo "phaser 0.8 0.74 3 0.4 0.5"
+    echo "pitch 2"
+    echo "riaa"
+    echo "sinc 20-4k"
+    echo "vol 10"
     echo ""
     echo "A full list of effects can be found here: http://sox.sourceforge.net/sox.html#EFFECTS"
 
-    exit 1
+    cleanup 1
 }
 
 function helpNeeded()
@@ -80,7 +91,7 @@ function parseArgs()
         ;;
         --blend=*)
             BLEND=${i#*=}
-            FFMPEG_OUT_OPTS="$FFMPEG_OUT_OPTS -f rawvideo -pix_fmt \$YUV_FMT -s \${RES} -i /tmp/tmp_audio_in.\${S_TYPE}"
+            FFMPEG_OUT_OPTS="$FFMPEG_OUT_OPTS -f rawvideo -pix_fmt \$YUV_FMT -s \${RES} -i \${TMP_DIR}/tmp_audio_out.\${S_TYPE}"
             FFMPEG_OUT_OPTS="$FFMPEG_OUT_OPTS -filter_complex \\\""
             FFMPEG_OUT_OPTS="$FFMPEG_OUT_OPTS [0:v]setpts=PTS-STARTPTS, scale=\${RES}[top]\;"
             FFMPEG_OUT_OPTS="$FFMPEG_OUT_OPTS [1:v]setpts=PTS-STARTPTS, scale=\${RES},"
@@ -119,7 +130,7 @@ function cmd()
         echo -e "\n\$ $@\n\n"
         echo -e "$OUTPUT"
         echo -e "\n----- ERROR -----"
-        exit 1
+        cleanup 1
     fi
     echo "$OUTPUT"
 }
@@ -132,7 +143,7 @@ function cmdSilent()
         echo -e "\n\$ $@\n\n"
         echo -e "$OUTPUT"
         echo -e "\n----- ERROR -----"
-        exit 1
+        cleanup 1
     fi
 }
 
@@ -146,7 +157,19 @@ function getResolution()
 function getFrames()
 {
     FRAMES=$(cmd ffprobe -v error -select_streams v:0 -show_entries stream=nb_frames -of default=noprint_wrappers=1:nokey=1 $1)
-    echo $FRAMES
+    REGEXP_INTEGER='^[0-9]+$'
+    if ! [[ $FRAMES =~ $REGEXP_INTEGER ]] ; then
+        echo ""
+        return 0
+    fi
+    echo "-frames $FRAMES"
+    return 0
+}
+
+function getAudio()
+{
+    AUDIO=$(cmd ffprobe -i $1 -show_streams -select_streams a -loglevel error)
+    [[ $AUDIO = *[!\ ]* ]] && echo "-i $TMP_DIR/audio_out.mp3"
 }
 
 function checkDependencies()
@@ -160,24 +183,48 @@ function checkDependencies()
 }
 
 checkDependencies ffprobe ffmpeg sox tr
+
+TMP_DIR=$(mktemp -d "/tmp/audio_shop-XXXXX")
 RES=$(getResolution $1 "x")
 parseArgs $@
-FRAMES=$(getFrames $1)
+VIDEO=$(getFrames $1)
+AUDIO=$(getAudio $1)
+
+echo "TMP_DIR:         $TMP_DIR"
 echo "FFMPEG_IN_OPTS:  $(eval echo $FFMPEG_IN_OPTS)"
 echo "FFMPEG_OUT_OPTS: $(eval echo $FFMPEG_OUT_OPTS)"
 echo "SOX_OPTS:        $(eval echo $SOX_OPTS)"
 
 echo "Extracting raw image data.."
-cmdSilent ffmpeg -y -i $1 -pix_fmt $YUV_FMT $FFMPEG_IN_OPTS /tmp/tmp.yuv
-mv /tmp/tmp.yuv /tmp/tmp_audio_in.$S_TYPE
+cmdSilent ffmpeg -y -i $1 -pix_fmt $YUV_FMT $FFMPEG_IN_OPTS  $TMP_DIR/tmp.yuv
 
-#echo "Exracting sound.."
-#ffmpeg -y -i $1 -vn -acodec copy /tmp/tmp_in.aac
+[[ $AUDIO = *[!\ ]* ]] && echo "Extracting audio track.."
+[[ $AUDIO = *[!\ ]* ]] && cmdSilent ffmpeg -y -i $1 -q:a 0 -map a $TMP_DIR/audio_in.mp3
+
 echo "Processing as sound.."
-cmdSilent sox --bits $BITS -c1 -r44100 --encoding unsigned-integer -t $S_TYPE /tmp/tmp_audio_in.$S_TYPE  \
-        --bits $BITS -c1 -r44100 --encoding unsigned-integer -t $S_TYPE /tmp/tmp_audio_out.$S_TYPE \
-        $SOX_OPTS
-mv /tmp/tmp_audio_out.$S_TYPE /tmp/tmp_out.yuv
+mv $TMP_DIR/tmp.yuv $TMP_DIR/tmp_audio_in.$S_TYPE
+cmdSilent sox --bits $BITS -c1 -r44100 --encoding unsigned-integer -t $S_TYPE $TMP_DIR/tmp_audio_in.$S_TYPE  \
+              --bits $BITS -c1 -r44100 --encoding unsigned-integer -t $S_TYPE $TMP_DIR/tmp_audio_out.$S_TYPE \
+              $SOX_OPTS
 
-echo "Creating image data from audio.."
-cmdSilent ffmpeg -y "$(eval echo $FFMPEG_OUT_OPTS)" -f rawvideo -pix_fmt $YUV_FMT -s $RES -i /tmp/tmp_out.yuv -frames $FRAMES $2
+[[ $AUDIO = *[!\ ]* ]] && echo "Processing audio track as sound.."
+[[ $AUDIO = *[!\ ]* ]] && cmdSilent sox $TMP_DIR/audio_in.mp3  \
+                                        $TMP_DIR/audio_out.mp3 \
+                                        $SOX_OPTS
+
+echo "Recreating image data from audio.."
+cmdSilent ffmpeg -y \
+                 "$(eval echo $FFMPEG_OUT_OPTS)" \
+                 -f rawvideo -pix_fmt $YUV_FMT -s $RES \
+                 -i $TMP_DIR/tmp_audio_out.$S_TYPE \
+                 $AUDIO \
+                 $VIDEO \
+                 $2
+
+#[[ $AUDIO = *[!\ ]* ]] && echo "Injecting modified audio.."
+#[[ $AUDIO = *[!\ ]* ]] && cmdSilent ffmpeg -y \
+#                                           -i $2 \
+#                                           $AUDIO \
+#                                           $2
+
+cleanup
