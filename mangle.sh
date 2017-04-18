@@ -57,20 +57,20 @@ function printHelp()
 
 function helpNeeded()
 {
-    if [ -z "${1+x}" ]; then
+    if [[ -z "${1+x}" ]]; then
         echo "Input file not provided!"
         printHelp
-    elif [ ! -f "$1" ]; then
+    elif [[ ! -f "$1" ]]; then
         echo "Input file '$1' not found!"
         printHelp
     fi
 
-    if [ -z "${2+x}" ]; then
+    if [[ -z "${2+x}" ]]; then
          echo "Output file not provided!"
         printHelp
     fi
 
-    if [ -z "${3+x}" ]; then
+    if [[ -z "${3+x}" ]]; then
          echo "No effect specified"
         printHelp
     fi
@@ -131,7 +131,7 @@ function parseArgs()
 function cmd()
 {
     OUTPUT=$(eval "$@" 2>&1)
-    if [ $? -ne 0 ]; then
+    if (( $? )); then
         echo -e "\n----- ERROR -----"
         echo -e "\n\$ ${*}\n\n"
         echo -e "$OUTPUT"
@@ -144,7 +144,7 @@ function cmd()
 function cmdSilent()
 {
     OUTPUT=$(eval "$@" 2>&1)
-    if [ $? -ne 0 ]; then
+    if (( $? )); then
         echo -e "\n----- ERROR -----"
         echo -e "\n\$ ${*}\n\n"
         echo -e "$OUTPUT"
