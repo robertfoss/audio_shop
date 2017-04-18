@@ -155,6 +155,7 @@ function cmdSilent()
 
 function getResolution()
 {
+
     eval "$(cmd ffprobe -v error -of flat=s=_ -select_streams v:0 -show_entries stream=height,width "$1")"
     RES="${streams_stream_0_width}${2}${streams_stream_0_height}"
     echo "$RES"
@@ -162,7 +163,8 @@ function getResolution()
 
 function getFrames()
 {
-    FRAMES="$(cmd ffprobe -v error -select_streams v:0 -show_entries stream=nb_frames -of default=noprint_wrappers=1:nokey=1 "$1")"
+
+    FRAMES=$(cmd "ffprobe -v error -select_streams v:0 -show_entries stream=nb_frames -of default=noprint_wrappers=1:nokey=1 \"$1\"")
     REGEXP_INTEGER='^[0-9]+$'
     if ! [[ $FRAMES =~ $REGEXP_INTEGER ]] ; then
         echo ""
@@ -174,7 +176,7 @@ function getFrames()
 
 function getAudio()
 {
-    AUDIO=$(cmd ffprobe -i "$1" -show_streams -select_streams a -loglevel error)
+    AUDIO=$(cmd "ffprobe -i \"$1\" -show_streams -select_streams a -loglevel error")
     [[ $AUDIO = *[!\ ]* ]] && echo "-i $TMP_DIR/audio_out.mp3"
 }
 
@@ -205,10 +207,10 @@ echo "FFMPEG_OUT_OPTS: $(eval echo "$FFMPEG_OUT_OPTS")"
 echo "SOX_OPTS:        $(eval echo "$SOX_OPTS")"
 
 echo "Extracting raw image data.."
-cmdSilent ffmpeg -y -i "$1" -pix_fmt "$YUV_FMT" "$FFMPEG_IN_OPTS"  "$TMP_DIR"/tmp.yuv
+cmdSilent "ffmpeg -y -i \"$1\" -pix_fmt $YUV_FMT $FFMPEG_IN_OPTS  $TMP_DIR/tmp.yuv"
 
 [[ $AUDIO = *[!\ ]* ]] && echo "Extracting audio track.."
-[[ $AUDIO = *[!\ ]* ]] && cmdSilent ffmpeg -y -i "$1" -q:a 0 -map a "$TMP_DIR"/audio_in.mp3
+[[ $AUDIO = *[!\ ]* ]] && cmdSilent "ffmpeg -y -i \"$1\" -q:a 0 -map a $TMP_DIR/audio_in.mp3"
 
 echo "Processing as sound.."
 mv "$TMP_DIR"/tmp.yuv "$TMP_DIR"/tmp_audio_in."$S_TYPE"
@@ -223,17 +225,17 @@ cmdSilent sox --bits "$BITS" -c1 -r44100 --encoding unsigned-integer -t "$S_TYPE
 
 echo "Recreating image data from audio.."
 cmdSilent ffmpeg -y \
-                 "$(eval echo "$FFMPEG_OUT_OPTS")" \
-                 -f rawvideo -pix_fmt "$YUV_FMT" -s "$RES" \
-                 -i "$TMP_DIR"/tmp_audio_out."$S_TYPE" \
-                 "$AUDIO" \
-                 "$VIDEO" \
-                 "$2"
+                 "$(eval echo $FFMPEG_OUT_OPTS)" \
+                 -f rawvideo -pix_fmt $YUV_FMT -s $RES \
+                 -i $TMP_DIR/tmp_audio_out.$S_TYPE \
+                 $AUDIO \
+                 $VIDEO \
+                 \"$2\"
 
 #[[ $AUDIO = *[!\ ]* ]] && echo "Injecting modified audio.."
 #[[ $AUDIO = *[!\ ]* ]] && cmdSilent ffmpeg -y \
-#                                           -i $2 \
+#                                           -i \"$2\" \
 #                                           $AUDIO \
-#                                           $2
+#                                           \"$2\"
 
 cleanup
