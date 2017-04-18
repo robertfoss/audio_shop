@@ -238,4 +238,4 @@ cmdSilent ffmpeg -y \
 #                                           $AUDIO \
 #                                           \"$2\"
 
-cleanup
+cleanup 0
