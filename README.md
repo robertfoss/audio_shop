@@ -5,22 +5,40 @@ If you'd like to read more about how this actually works, have a look [here](htt
 
 ## Usage
     $ ./mangle.sh in.jpg out.png [effect [effect]]
-    
-    List of effects:
-    vol 10
+
+    This script lets you interpret image or video data as sound,
+    and apply audio effects to it before converting it back to
+    image representation
+
+    Options:
+    --bits=X          -- Set audio sample size in bits, 8/16/24
+    --blend=X         -- Blend the distorted video with original video, 0.5
+    --color-format=X  -- Color space/format, rgb24/yuv444p/yuyv422. Full list: $ ffmpeg -pix_fmts
+    --res=WxH         -- Set output resolution, 1920x1080
+
+    Effects:
     bass 5
-    sinc 20-4k
-    riaa
-    pitch 2
-    phaser 0.8 0.74 3 0.7 0.5
-    phaser 0.8 0.74 3 0.4 0.5
-    overdrive 17
-    norm 90
     echo 0.8 0.88 60 0.4
+    flanger 0 2 0 71 0.5 25 lin
     hilbert -n 5001
     loudness 6
-    
+    norm 90
+    overdrive 17
+    phaser 0.8 0.74 3 0.7 0.5
+    phaser 0.8 0.74 3 0.4 0.5
+    pitch 2
+    riaa
+    sinc 20-4k
+    vol 10
+
+    Example:
+    ./mangle in.jpg out.jpg vol 11
+    ./mangle in.mp4 out.mp4 echo 0.8 0.88 60 0.4
+    ./mangle in.mp4 out.mp4 pitch 5 --res=1280x720
+    ./mangle in.mp4 out.mp4 pitch 5 --blend=0.75 --color-format=yuv444p --bits=8
+
     A full list of effects can be found here: http://sox.sourceforge.net/sox.html#EFFECTS
+
     
 ## Dependencies
  * ffmpeg

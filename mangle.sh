@@ -44,6 +44,13 @@ function printHelp()
     echo "sinc 20-4k"
     echo "vol 10"
     echo ""
+    echo "Example:"
+    echo ""
+    echo "./mangle in.jpg out.jpg vol 11"
+    echo "./mangle in.mp4 out.mp4 echo 0.8 0.88 60 0.4"
+    echo "./mangle in.mp4 out.mp4 pitch 5 --res=1280x720"
+    echo "./mangle in.mp4 out.mp4 pitch 5 --blend=0.75 --color-format=yuv444p --bits=8"
+    echo ""
     echo "A full list of effects can be found here: http://sox.sourceforge.net/sox.html#EFFECTS"
 
     cleanup 1
