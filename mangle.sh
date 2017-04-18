@@ -3,6 +3,7 @@
 function cleanup()
 {
     rm -rf --preserve-root ${TMP_DIR}
+    echo "$1"
     exit $1
 }
 
@@ -60,7 +61,7 @@ function helpNeeded()
     if [ -z ${1+x} ]; then
         echo -e "Input file not provided!\n"
         printHelp
-    elif [ ! -f $1 ]; then
+    elif [ ! -f "$1" ]; then
         echo -e "Input file '$1' not found!\n"
         printHelp
     fi
@@ -78,7 +79,7 @@ function helpNeeded()
 
 function parseArgs()
 {
-    helpNeeded $@
+    helpNeeded "$@"
 
     # Default values
     BITS=8
@@ -155,14 +156,14 @@ function cmdSilent()
 
 function getResolution()
 {
-    eval $(cmd ffprobe -v error -of flat=s=_ -select_streams v:0 -show_entries stream=height,width $1)
+    eval $(cmd "ffprobe -v error -of flat=s=_ -select_streams v:0 -show_entries stream=height,width \"$1\"")
     RES=${streams_stream_0_width}${2}${streams_stream_0_height}
     echo $RES
 }
 
 function getFrames()
 {
-    FRAMES=$(cmd ffprobe -v error -select_streams v:0 -show_entries stream=nb_frames -of default=noprint_wrappers=1:nokey=1 $1)
+    FRAMES=$(cmd "ffprobe -v error -select_streams v:0 -show_entries stream=nb_frames -of default=noprint_wrappers=1:nokey=1 \"$1\"")
     REGEXP_INTEGER='^[0-9]+$'
     if ! [[ $FRAMES =~ $REGEXP_INTEGER ]] ; then
         echo ""
@@ -174,7 +175,7 @@ function getFrames()
 
 function getAudio()
 {
-    AUDIO=$(cmd ffprobe -i $1 -show_streams -select_streams a -loglevel error)
+    AUDIO=$(cmd "ffprobe -i \"$1\" -show_streams -select_streams a -loglevel error")
     [[ $AUDIO = *[!\ ]* ]] && echo "-i $TMP_DIR/audio_out.mp3"
 }
 
@@ -189,12 +190,12 @@ function checkDependencies()
 }
 
 checkDependencies ffprobe ffmpeg sox tr
-parseArgs $@
+parseArgs "$@"
 
 TMP_DIR=$(mktemp -d "/tmp/audio_shop-XXXXX")
-RES=${RES:-"$(getResolution $1 x)"}
-VIDEO=${VIDEO:-"$(getFrames $1)"}
-AUDIO=${AUDIO:-"$(getAudio $1)"}
+RES=${RES:-"$(getResolution "$1" x)"}
+VIDEO=${VIDEO:-"$(getFrames "$1")"}
+AUDIO=${AUDIO:-"$(getAudio "$1")"}
 
 echo "TMP_DIR:         $TMP_DIR"
 echo "RES:             $RES"
@@ -205,10 +206,10 @@ echo "FFMPEG_OUT_OPTS: $(eval echo $FFMPEG_OUT_OPTS)"
 echo "SOX_OPTS:        $(eval echo $SOX_OPTS)"
 
 echo "Extracting raw image data.."
-cmdSilent ffmpeg -y -i $1 -pix_fmt $YUV_FMT $FFMPEG_IN_OPTS  $TMP_DIR/tmp.yuv
+cmdSilent "ffmpeg -y -i \"$1\" -pix_fmt $YUV_FMT $FFMPEG_IN_OPTS  $TMP_DIR/tmp.yuv"
 
 [[ $AUDIO = *[!\ ]* ]] && echo "Extracting audio track.."
-[[ $AUDIO = *[!\ ]* ]] && cmdSilent ffmpeg -y -i $1 -q:a 0 -map a $TMP_DIR/audio_in.mp3
+[[ $AUDIO = *[!\ ]* ]] && cmdSilent "ffmpeg -y -i \"$1\" -q:a 0 -map a $TMP_DIR/audio_in.mp3"
 
 echo "Processing as sound.."
 mv $TMP_DIR/tmp.yuv $TMP_DIR/tmp_audio_in.$S_TYPE
@@ -228,12 +229,12 @@ cmdSilent ffmpeg -y \
                  -i $TMP_DIR/tmp_audio_out.$S_TYPE \
                  $AUDIO \
                  $VIDEO \
-                 $2
+                 \"$2\"
 
 #[[ $AUDIO = *[!\ ]* ]] && echo "Injecting modified audio.."
 #[[ $AUDIO = *[!\ ]* ]] && cmdSilent ffmpeg -y \
-#                                           -i $2 \
+#                                           -i \"$2\" \
 #                                           $AUDIO \
-#                                           $2
+#                                           \"$2\"
 
 cleanup
