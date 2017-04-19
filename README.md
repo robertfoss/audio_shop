@@ -46,7 +46,7 @@ If you'd like to read more about how this actually works, have a look [here](htt
 
 ## Effects
 
-### Video: Overdrive Hilbert
+### Overdrive Hilbert
 [![Alt text](/../media/apollo_b8_fyuv444p_overdrive_hilbert.gif?raw=true "Apollo 11 launch")](/../media/apollo_b8_fyuv444p_overdrive_hilbert.mp4?raw=true)
 
 
