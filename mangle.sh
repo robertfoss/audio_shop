@@ -155,16 +155,14 @@ function cmdSilent()
 
 function getResolution()
 {
-
-    eval "$(cmd ffprobe -v error -of flat=s=_ -select_streams v:0 -show_entries stream=height,width "$1")"
+    eval $(cmd ffprobe -v error -of flat=s=_ -select_streams v:0 -show_entries stream=height,width \"$1\")
     RES="${streams_stream_0_width}${2}${streams_stream_0_height}"
     echo "$RES"
 }
 
 function getFrames()
 {
-
-    FRAMES=$(cmd "ffprobe -v error -select_streams v:0 -show_entries stream=nb_frames -of default=noprint_wrappers=1:nokey=1 \"$1\"")
+    FRAMES=$(cmd ffprobe -v error -select_streams v:0 -show_entries stream=nb_frames -of default=noprint_wrappers=1:nokey=1 \"$1\")
     REGEXP_INTEGER='^[0-9]+$'
     if ! [[ $FRAMES =~ $REGEXP_INTEGER ]] ; then
         echo ""
@@ -176,7 +174,7 @@ function getFrames()
 
 function getAudio()
 {
-    AUDIO=$(cmd "ffprobe -i \"$1\" -show_streams -select_streams a -loglevel error")
+    AUDIO=$(cmd ffprobe -i \"$1\" -show_streams -select_streams a -loglevel error)
     [[ $AUDIO = *[!\ ]* ]] && echo "-i $TMP_DIR/audio_out.mp3"
 }
 
