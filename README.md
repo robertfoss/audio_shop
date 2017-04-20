@@ -1,5 +1,5 @@
 # Audio Shop
-Your friendly neighborhood script for mangling images using audio editing tools.
+Your friendly neighborhood script for mangling images or video using audio editing tools.
 
 If you'd like to read more about how this actually works, have a look [here](http://memcpy.io/audio-editing-images.html).
 
