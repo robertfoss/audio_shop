@@ -181,7 +181,7 @@ function getFrames()
 function getAudio()
 {
     AUDIO=$(cmd ffprobe -i \"$1\" -show_streams -select_streams a -loglevel error)
-    [[ $AUDIO = *[!\ ]* ]] && echo "-i $TMP_DIR/audio_out.mp3"
+    [[ $AUDIO = *[!\ ]* ]] && echo "-i $TMP_DIR/audio_out.${AUDIO_TYPE}"
 }
 
 function checkDependencies()
@@ -197,6 +197,7 @@ function checkDependencies()
 checkDependencies ffprobe ffmpeg sox tr
 parseArgs "$@"
 
+AUDIO_TYPE="mp3"
 TMP_DIR=$(mktemp -d "/tmp/audio_shop-XXXXX")
 RES=${RES:-"$(getResolution "$1" x)"}
 VIDEO=${VIDEO:-"$(getFrames "$1")"}
@@ -214,7 +215,7 @@ echo "Extracting raw image data.."
 cmdSilent "ffmpeg -y -i \"$1\" -pix_fmt $YUV_FMT $FFMPEG_IN_OPTS  $TMP_DIR/tmp.yuv"
 
 [[ $AUDIO = *[!\ ]* ]] && echo "Extracting audio track.."
-[[ $AUDIO = *[!\ ]* ]] && cmdSilent "ffmpeg -y -i \"$1\" -q:a 0 -map a $TMP_DIR/audio_in.mp3"
+[[ $AUDIO = *[!\ ]* ]] && cmdSilent "ffmpeg -y -i \"$1\" -q:a 0 -map a $TMP_DIR/audio_in.${AUDIO_TYPE}"
 
 echo "Processing as sound.."
 mv "$TMP_DIR"/tmp.yuv "$TMP_DIR"/tmp_audio_in."$S_TYPE"
@@ -223,8 +224,8 @@ cmdSilent sox --bits "$BITS" -c1 -r44100 --encoding unsigned-integer -t "$S_TYPE
               "$SOX_OPTS"
 
 [[ $AUDIO = *[!\ ]* ]] && echo "Processing audio track as sound.."
-[[ $AUDIO = *[!\ ]* ]] && cmdSilent sox "$TMP_DIR"/audio_in.mp3  \
-                                        "$TMP_DIR"/audio_out.mp3 \
+[[ $AUDIO = *[!\ ]* ]] && cmdSilent sox "$TMP_DIR"/audio_in.${AUDIO_TYPE}  \
+                                        "$TMP_DIR"/audio_out.${AUDIO_TYPE} \
                                         "$SOX_OPTS"
 
 echo "Recreating image data from audio.."
