@@ -2,7 +2,13 @@
 
 function cleanup()
 {
-    rm -rf --preserve-root "${TMP_DIR}"
+    if [[ -z "${TMP_DIR}" ]]; then
+        exit "$1"
+    elif [[ !"${TMP_DIR}" == "/tmp/audio_shop/*" ]]; then
+        exit "$1"
+    fi
+
+    rm -rf "${TMP_DIR}"
     exit "$1"
 }
 
