@@ -4,7 +4,7 @@ function cleanup()
 {
     if [[ -z "${TMP_DIR}" ]]; then
         exit "$1"
-    elif [[ !"${TMP_DIR}" == "/tmp/audio_shop/*" ]]; then
+    elif [[ ! "${TMP_DIR}" == "/tmp/audio_shop"* ]]; then
         exit "$1"
     fi
 
