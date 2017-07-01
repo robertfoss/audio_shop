@@ -21,20 +21,8 @@ function printDependencies()
     cleanup 1
 }
 
-function printHelp()
+function printEffects()
 {
-    echo "$ ./mangle.sh in.jpg out.png [effect [effect]]"
-    echo ""
-    echo "This script lets you interpret image or video data as sound,"
-    echo "and apply audio effects to it before converting it back to"
-    echo "image representation"
-    echo ""
-    echo "Options:"
-    echo "--bits=X          -- Set audio sample size in bits, 8/16/24"
-    echo "--blend=X         -- Blend the distorted video with original video, 0.5"
-    echo "--color-format=X  -- Color space/format, rgb24/yuv444p/yuyv422. Full list: $ ffmpeg -pix_fmts"
-    echo "--res=WxH         -- Set output resolution, 1920x1080"
-    echo ""
     echo "Effects:"
     echo "bass 5"
     echo "echo 0.8 0.88 60 0.4"
@@ -49,6 +37,25 @@ function printHelp()
     echo "riaa"
     echo "sinc 20-4k"
     echo "vol 10"
+}
+
+function printHelp()
+{
+    echo "$ ./mangle.sh in.jpg out.png [effect [effect]]"
+    echo ""
+    echo "This script lets you interpret image or video data as sound,"
+    echo "and apply audio effects to it before converting it back to"
+    echo "image representation"
+    echo ""
+    echo "Options:"
+    echo "--bits=X          -- Set audio sample size in bits, 8/16/24"
+    echo "--blend=X         -- Blend the distorted video with original video, 0.5"
+    echo "--color-format=X  -- Color space/format, rgb24/yuv444p/yuyv422. Full list: $ ffmpeg -pix_fmts"
+    echo "--effects         -- Suggest some effects"
+    echo "--help            -- Display this information"
+    echo "--res=WxH         -- Set output resolution, 1920x1080"
+    echo ""
+    printEffects
     echo ""
     echo "Examples:"
     echo "./mangle in.jpg out.jpg vol 11"
@@ -84,11 +91,24 @@ function helpNeeded()
 
 function parseArgs()
 {
-    helpNeeded "$@"
-
     # Default values
     BITS=8
     YUV_FMT=rgb24
+
+    for i in "${@}"
+    do
+    case $i in
+        --effects)
+            printEffects
+            cleanup 0
+        ;;
+        --help)
+            printHelp
+        ;;
+        *)
+        ;;
+    esac
+    done
 
     for i in "${@:3}"
     do
@@ -113,6 +133,9 @@ function parseArgs()
         --color-format=*)
             YUV_FMT=${i#*=}
         ;;
+        --help)
+            printHelp
+        ;;
         --*)
             echo -e "Option $i not recognized\n"
             printHelp
@@ -123,6 +146,8 @@ function parseArgs()
         ;;
     esac
     done
+
+    helpNeeded "$@"
 
     export BITS
     export YUV_FMT
