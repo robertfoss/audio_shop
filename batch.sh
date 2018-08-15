@@ -37,11 +37,12 @@ for format in "${format[@]}"
 do
   for i in "${effects[@]}"
   do
-     EFFECT=${i// /-}
-     echo "EFFECTS=$EFFECT"
-     OUTPUT="${FILE}_${format}_${EFFECT}.${EXT}" 
-     echo "OUTPUT=${OUTPUT} "
-     $REPO_DIR/mangle.sh "$1" "${OUTPUT}" --color-format=${format}  $i
-
+    EFFECT=${i// /-}
+    OUTPUT="${FILE}_${format}_${EFFECT}.${EXT}"
+    if [ ! -f "$OUTPUT" ]; then
+      echo "EFFECTS=$EFFECT"
+      echo "OUTPUT=${OUTPUT} "
+      $REPO_DIR/mangle.sh "$1" "${OUTPUT}" --color-format=${format}  $i
+    fi
   done
 done
