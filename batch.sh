@@ -23,7 +23,6 @@ declare -a effects=("bass 5"
 
 declare -a format=("yuv444p"
                    "rgb24"
-                   "gbrp"
                    "bgr8"
 
 )
